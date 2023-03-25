@@ -2,48 +2,51 @@ package com.melihgencturk.ecommerceapp.business.concretes;
 
 
 import com.melihgencturk.ecommerceapp.business.abstracts.ProductService;
-import com.melihgencturk.ecommerceapp.entities.concretes.Product;
-import com.melihgencturk.ecommerceapp.repository.abstracts.ProductRepository;
+import com.melihgencturk.ecommerceapp.entities.Product;
+import com.melihgencturk.ecommerceapp.repository.ProductRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class ProductManager implements ProductService {
-    private final ProductRepository repository;
 
-    public ProductManager(ProductRepository repository) {
-        this.repository = repository;
-    }
+    private final ProductRepository repository;
 
     @Override
     public List<Product> getAll() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     @Override
     public Product getById(int id) {
-        return repository.getById(id);
+        checkIfProductExists(id);
+        return repository.findById(id).orElseThrow();
     }
 
     @Override
     public Product add(Product product) {
         validateProduct(product);
-        return repository.add(product);
+        return repository.save(product);
     }
 
     @Override
     public Product update(int id, Product product) {
+        checkIfProductExists(id);
         validateProduct(product);
-        return repository.update(id, product);
+        product.setId(id);
+        return repository.save(product);
     }
 
     @Override
     public void delete(int id) {
-        repository.delete(id);
+        checkIfProductExists(id);
+        repository.deleteById(id);
     }
 
-    //! Business rules
+    //Let's get down to Business!
 
     private void validateProduct(Product product) {
         checkIfUnitPriceValid(product);
@@ -63,5 +66,9 @@ public class ProductManager implements ProductService {
     private void checkIfDescriptionLengthValid(Product product) {
         if (product.getDescription().length() < 10 || product.getDescription().length() > 50)
             throw new IllegalArgumentException("Description length must be between 10 and 50 characters.");
+    }
+
+    private void checkIfProductExists(int id){
+        if (!repository.existsById(id)) throw new IllegalArgumentException("There is not such a product");
     }
 }

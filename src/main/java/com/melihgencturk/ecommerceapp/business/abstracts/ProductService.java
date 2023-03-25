@@ -2,7 +2,7 @@ package com.melihgencturk.ecommerceapp.business.abstracts;
 
 
 
-import com.melihgencturk.ecommerceapp.entities.concretes.Product;
+import com.melihgencturk.ecommerceapp.entities.Product;
 
 import java.util.List;
 
